@@ -146,12 +146,20 @@ describe("mul", () => {
   });
 });
 
-describe('inverse', () => {
-  it('correctly computes inverse of a 2x2 non-singular matrix', () => {
-    const a = new Matrix([[1, 2], [1, -1]]);
+describe("inverse", () => {
+  it("correctly computes inverse of a 2x2 non-singular matrix", () => {
+    const a = new Matrix([
+      [1, 2],
+      [1, -1],
+    ]);
 
-    const expectedResult = new Matrix([[-1/3, 1/3], [2/3, 1/3]]);
+    const expectedResult = new Matrix([
+      [-1 / 3, 1 / 3],
+      [2 / 3, 1 / 3],
+    ]);
     const actualResult = a.inverse();
-    expect(a.inverse().equalsWithAcceptableError(expectedResult, 0.01)).toBe(true);
-  })
-})
+    expect(a.inverse().equalsWithAcceptableError(expectedResult, 0.01)).toBe(
+      true,
+    );
+  });
+});

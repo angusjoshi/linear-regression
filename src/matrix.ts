@@ -61,7 +61,7 @@ export class Matrix {
     for (let i = 0; i < this.getRowDimension(); i++) {
       for (let j = 0; j < this.getColDimension(); j++) {
         const difference = Math.abs(this.rows[i][j] - other.rows[i][j]);
-        if(difference > acceptableError) {
+        if (difference > acceptableError) {
           return false;
         }
       }
@@ -78,24 +78,27 @@ export class Matrix {
   }
   public inverse() {
     if (this.getColDimension() != this.getColDimension()) {
-    throw new Error('Cannot invert non-square matrix');
+      throw new Error("Cannot invert non-square matrix");
     }
 
     if (this.getRowDimension() != 2) {
       // TODO implement inversion for larger matrices
-      throw new Error('Inversion is currently only supported for 2x2 matrices');
+      throw new Error("Inversion is currently only supported for 2x2 matrices");
     }
 
-    const det = this.rows[0][0]*this.rows[1][1] - this.rows[0][1]*this.rows[1][0];
+    const det =
+      this.rows[0][0] * this.rows[1][1] - this.rows[0][1] * this.rows[1][0];
 
     if (det == 0) {
-      throw new Error('The matrix is singular and cannot be inverted');
+      throw new Error("The matrix is singular and cannot be inverted");
     }
 
-    const newRows = [[this.rows[1][1], -this.rows[1][0]], [this.rows[0][0], -this.rows[0][1]]];
+    const newRows = [
+      [this.rows[1][1], -this.rows[1][0]],
+      [this.rows[0][0], -this.rows[0][1]],
+    ];
 
     return new Matrix(newRows);
-
   }
 
   private swapRows(a: number, b: number) {
@@ -110,6 +113,4 @@ export class Matrix {
   private static addRows(left: number[], right: number[]) {
     return left.map((entry, index) => entry + right[index]);
   }
-
-
 }
