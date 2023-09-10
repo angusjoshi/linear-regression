@@ -1,0 +1,17 @@
+{
+  "name": "linear-regression",
+  "module": "index.ts",
+  "devDependencies": {
+    "bun-types": "latest",
+    "jest": "^29.6.4",
+    "eslint": "^8.49.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "test": "jest",
+    "reformat": "bunx prettier . --write"
+  },
+  "type": "module"
+}
