@@ -72,38 +72,51 @@ describe("weightedLinearRegression", () => {
 
     const expectedResult = {
       yHat: Matrix.columnVector([5.369072]),
-      yHatStandardError: [ 0.9723889462909812 ],
+      yHatStandardError: [0.9723889462909812],
       betas: Matrix.columnVector([0.588144, 0.956186]),
-      betaStandardErrors: [ 0.41868459525895235, 0.24172766377830565 ],
-      x: Matrix.columnVector([ 5 ]),
-    }
+      betaStandardErrors: [0.41868459525895235, 0.24172766377830565],
+      x: Matrix.columnVector([5]),
+    };
 
     expectResultToBeCloseTo(result, expectedResult);
   });
 });
 
-const expectResultToBeCloseTo = (result: LinearModel, expectedResult: LinearModel) => {
+/**
+ * have to use toBeClose to rather than just toEqual due to floating point precision issues.
+ * i don't know a way to do this with object deep equality testing so i test each member individually.
+ **/
+const expectResultToBeCloseTo = (
+  result: LinearModel,
+  expectedResult: LinearModel,
+) => {
   expectMatricesToBeClose(result.yHat, expectedResult.yHat);
-  expectArraysToBeClose(result.yHatStandardError, expectedResult.yHatStandardError);
+  expectArraysToBeClose(
+    result.yHatStandardError,
+    expectedResult.yHatStandardError,
+  );
   expectMatricesToBeClose(result.betas, expectedResult.betas);
-  expectArraysToBeClose(result.betaStandardErrors, expectedResult.betaStandardErrors);
+  expectArraysToBeClose(
+    result.betaStandardErrors,
+    expectedResult.betaStandardErrors,
+  );
   expectMatricesToBeClose(result.x, expectedResult.x);
-}
+};
 
-// have to use toBeClose to rather than just toEqual due to floating point precision issues.
-// unfortunately no nice way to do this with object deep equality testing, so test each member individually.
 const expectMatricesToBeClose = (result: Matrix, expectedResult: Matrix) => {
-  expect(result.rows).toEqual(expectedResult.rows)
-  expect(result.columns).toEqual(expectedResult.columns)
+  expect(result.rows).toEqual(expectedResult.rows);
+  expect(result.columns).toEqual(expectedResult.columns);
 
-  for(let i = 0; i < result.rows; i++) {
-    for(let j = 0; j < result.columns; j++) {
+  for (let i = 0; i < result.rows; i++) {
+    for (let j = 0; j < result.columns; j++) {
       expect(result.get(i, j)).toBeCloseTo(expectedResult.get(i, j), 4);
     }
   }
-}
+};
 
 const expectArraysToBeClose = (result: number[], expectedResult: number[]) => {
   expect(result.length).toEqual(expectedResult.length);
-  result.forEach((num, index) => expect(num).toBeCloseTo(expectedResult[index], 4))
-}
+  result.forEach((num, index) =>
+    expect(num).toBeCloseTo(expectedResult[index], 4),
+  );
+};
