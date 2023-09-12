@@ -37,6 +37,21 @@ describe("constructor", () => {
   });
 });
 
+describe("scale", () => {
+  it("scales a matrix correctly", () => {
+    const a = new Matrix([
+      [1, 2, 3],
+      [4, 5, 6],
+    ]);
+
+    const expectedResult = new Matrix([
+      [2, 4, 6],
+      [8, 10, 12],
+    ]);
+
+    expect(a.scale(2).equals(expectedResult)).toBe(true);
+  });
+});
 describe("equals", () => {
   it("returns true for equal square matrices", () => {
     const leftMatrix = new Matrix([
@@ -154,12 +169,176 @@ describe("inverse", () => {
     ]);
 
     const expectedResult = new Matrix([
-      [-1 / 3, 1 / 3],
-      [2 / 3, 1 / 3],
+      [1 / 3, 1 / 3],
+      [2 / 3, -1 / 3],
     ]);
-    const actualResult = a.inverse();
-    expect(a.inverse().equalsWithAcceptableError(expectedResult, 0.01)).toBe(
+    expect(a.inverse().equalsWithAcceptableError(expectedResult, 0.001)).toBe(
       true,
+    );
+  });
+
+  it("throws if the matrix is non-singular", () => {
+    const a = new Matrix([
+      [1, 1],
+      [1, 1],
+    ]);
+    expect(() => a.inverse()).toThrow(
+      "The matrix is singular and cannot be inverted",
+    );
+  });
+
+  it("throws if the matrix is not square", () => {
+    const a = new Matrix([
+      [1, 2, 3],
+      [4, 5, 6],
+    ]);
+
+    expect(() => a.inverse()).toThrow("Cannot invert non-square matrix");
+  });
+});
+
+describe("add", () => {
+  it("adds matrices with the same dimension correctly", () => {
+    const a = new Matrix([
+      [1, 2],
+      [3, 4],
+    ]);
+    const b = new Matrix([
+      [5, 6],
+      [7, 8],
+    ]);
+
+    const expectedResult = new Matrix([
+      [6, 8],
+      [10, 12],
+    ]);
+
+    expect(a.add(b).equals(expectedResult)).toBe(true);
+  });
+
+  it("throws if the matrices have differing dimensions", () => {
+    const a = new Matrix([
+      [1, 2, 3],
+      [4, 5, 6],
+    ]);
+    const b = new Matrix([
+      [1, 2],
+      [3, 4],
+    ]);
+
+    expect(() => a.add(b)).toThrow(
+      "Cannot add matrices with differing dimensions",
+    );
+  });
+});
+describe("sub", () => {
+  it("subtracts matrices with the same dimension correctly", () => {
+    const a = new Matrix([
+      [1, 2],
+      [3, 4],
+    ]);
+    const b = new Matrix([
+      [5, 6],
+      [7, 8],
+    ]);
+
+    const expectedResult = new Matrix([
+      [-4, -4],
+      [-4, -4],
+    ]);
+
+    expect(a.sub(b).equals(expectedResult)).toBe(true);
+  });
+
+  it("throws if the matrices have differing dimensions", () => {
+    const a = new Matrix([
+      [1, 2, 3],
+      [4, 5, 6],
+    ]);
+    const b = new Matrix([
+      [1, 2],
+      [3, 4],
+    ]);
+
+    expect(() => a.sub(b)).toThrow(
+      "Cannot subtract matrices with differing dimensions",
+    );
+  });
+});
+
+describe("transpose", () => {
+  it("transposes square matrix correctly", () => {
+    const a = new Matrix([
+      [1, 2],
+      [3, 4],
+    ]);
+
+    const expectedResult = new Matrix([
+      [1, 3],
+      [2, 4],
+    ]);
+
+    expect(a.transpose().equals(expectedResult)).toBe(true);
+  });
+
+  it("transposes rectangular matrix correctly", () => {
+    const a = new Matrix([
+      [1, 2, 3],
+      [3, 4, 5],
+    ]);
+
+    const expectedResult = new Matrix([
+      [1, 3],
+      [2, 4],
+      [3, 5],
+    ]);
+
+    expect(a.transpose().equals(expectedResult)).toBe(true);
+  });
+});
+
+describe("scaleRows", () => {
+  it("scales rows of square matrix correctly", () => {
+    const a = new Matrix([
+      [1, 2],
+      [3, 4],
+    ]);
+    const scalingFactors = [2, 3];
+
+    const expectedResult = new Matrix([
+      [2, 4],
+      [9, 12],
+    ]);
+
+    expect(a.scaleRows(scalingFactors).equals(expectedResult)).toBe(true);
+  });
+
+  it("scales rows of rectangular matrix correctly", () => {
+    const a = new Matrix([
+      [1, 2, 3],
+      [3, 4, 5],
+    ]);
+    const scalingFactors = [2, 3];
+
+    const expectedResult = new Matrix([
+      [2, 4, 6],
+      [9, 12, 15],
+    ]);
+
+    expect(a.scaleRows(scalingFactors).equals(expectedResult)).toBe(true);
+  });
+
+  it("throws if the length of scaling factors is not equal to the row dimension", () => {
+    const a = new Matrix([
+      [1, 2, 3],
+      [3, 4, 5],
+      [5, 1, 3],
+    ]);
+
+    const scalingFactors = [1, 2];
+
+    expect(() => a.scaleRows(scalingFactors)).toThrow(
+      "scaling factors array must be the same length as the row dimension of the matrix",
     );
   });
 });
