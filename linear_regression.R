@@ -56,6 +56,10 @@ linear_reg_weights_or_sigma <- function(X, y, x_new, weights = NULL, sigma = NUL
 
   var_y_new <- t(x_new_design) %*% cov_matrix %*% x_new_design
 
+    print('sasdf')
+  print(var_y_new)
+    print('asdfvqwlekrjw')
+
   ans <- data.frame(
     type = type,
     x = x_new, yhat = y_new, yhat_se = sqrt(var_y_new),
