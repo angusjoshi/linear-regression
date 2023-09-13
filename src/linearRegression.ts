@@ -8,14 +8,12 @@ export type LinearModel = {
   x: Matrix;
 };
 
-type RegressionType = "SIGMA" | "WEIGHTED";
-
 function linearRegression(
   x: Matrix,
   y: Matrix,
   weights: number[],
   newX: Matrix,
-  regressionType: RegressionType,
+  varianceFunction: (residuals: number[]) => number,
 ): LinearModel {
   const rootWeights = sqrtArray(weights);
   const weightedX = scaleRows(x, rootWeights);
@@ -27,11 +25,7 @@ function linearRegression(
   const residuals = Matrix.sub(y, x.mmul(betas));
   const residualsAsArray = residuals.getColumn(0);
 
-  const errorVariance =
-    regressionType === "WEIGHTED"
-      ? arraySum(elementwiseProduct(weights, squareArray(residualsAsArray))) /
-        (y.rows - x.columns)
-      : 1;
+  const errorVariance = varianceFunction(residualsAsArray);
 
   const covarianceMatrix = Matrix.mul(inverseWeightedXTX, errorVariance);
   const errorCoefficients = sqrtArray(covarianceMatrix.diag());
@@ -57,7 +51,10 @@ export function weightedLinearRegression(
   newX: Matrix,
   weights: number[],
 ): LinearModel {
-  return linearRegression(x, y, weights, newX, "WEIGHTED");
+  const varianceFunction = (residuals: number[]) =>
+    arraySum(elementwiseProduct(weights, squareArray(residuals))) /
+    (y.rows - x.columns);
+  return linearRegression(x, y, weights, newX, varianceFunction);
 }
 
 export function sigmaLinearRegression(
@@ -67,12 +64,13 @@ export function sigmaLinearRegression(
   sigmas: number[],
 ): LinearModel {
   const weights = sigmas.map((sigma) => 1 / (sigma * sigma));
-  return linearRegression(x, y, weights, newX, "SIGMA");
+  const varianceFunction = (_: number[]) => 1;
+  return linearRegression(x, y, weights, newX, varianceFunction);
 }
 
 export function unweightedLinearRegression(x: Matrix, y: Matrix, newX: Matrix) {
   const weights = new Array(x.rows).fill(1);
-  return linearRegression(x, y, weights, newX, "WEIGHTED");
+  return weightedLinearRegression(x, y, newX, weights);
 }
 
 export const scaleRows = (theMatrix: Matrix, scaleBy: number[]) => {
