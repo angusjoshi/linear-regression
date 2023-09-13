@@ -8,53 +8,76 @@ export type LinearModel = {
   x: Matrix;
 };
 
+type LinearRegression = {
+  betas: Matrix;
+  residuals: number[];
+  covarianceMatrix: Matrix;
+};
+type RegressionType = "SIGMA" | "WEIGHTED";
+
+function linearRegression(
+  x: Matrix,
+  y: Matrix,
+  weights: number[],
+  newX: Matrix,
+  regressionType: RegressionType,
+): LinearModel {
+  const rootWeights = sqrtArray(weights);
+  const weightedX = scaleRows(x, rootWeights);
+  const weightedY = scaleRows(y, rootWeights);
+  const weightedXT = weightedX.transpose();
+  const weightedXTX = weightedXT.mmul(weightedX);
+  const inverseWeightedXTX = inverse(weightedXTX);
+  const betas = inverseWeightedXTX.mmul(weightedXT).mmul(weightedY);
+  const residuals = Matrix.sub(y, x.mmul(betas));
+  const residualsAsArray = residuals.getColumn(0);
+
+  const errorVariance =
+    regressionType === "WEIGHTED"
+      ? arraySum(elementwiseProduct(weights, squareArray(residualsAsArray))) /
+        (y.rows - x.columns)
+      : 1;
+
+  const covarianceMatrix = Matrix.mul(inverseWeightedXTX, errorVariance);
+  const errorCoefficients = sqrtArray(covarianceMatrix.diag());
+  const newXDesign = newX.clone().addColumn(0, new Array(newX.rows).fill(1));
+  const newY = newXDesign.mmul(betas);
+  const newYVariance = newXDesign
+    .mmul(covarianceMatrix)
+    .mmul(newXDesign.transpose());
+  const newYStandardError = sqrtArray(newYVariance.getColumn(0));
+
+  return {
+    x: newX,
+    yHat: newY,
+    yHatStandardError: newYStandardError,
+    betas: betas,
+    betaStandardErrors: errorCoefficients,
+  };
+}
+
 export function weightedLinearRegression(
   x: Matrix,
   y: Matrix,
   newX: Matrix,
   weights: number[],
 ): LinearModel {
-  const rootWeights = sqrtArray(weights);
+  return linearRegression(x, y, weights, newX, "WEIGHTED");
+}
 
-  const weightedX = scaleRows(x, rootWeights);
-  const weightedY = scaleRows(y, rootWeights);
+export function sigmaLinearRegression(
+  x: Matrix,
+  y: Matrix,
+  newX: Matrix,
+  sigmas: number[],
+): LinearModel {
+  const weights = sigmas.map((sigma) => 1 / (sigma * sigma));
+  return linearRegression(x, y, weights, newX, "SIGMA");
+}
 
-  const weightedXT = weightedX.transpose();
-  const weightedXTX = weightedXT.mmul(weightedX);
-
-  const inverseWeightedXXT = inverse(weightedXTX);
-
-  const beta = inverseWeightedXXT.mmul(weightedXT).mmul(weightedY);
-
-  const residuals = Matrix.sub(y, x.mmul(beta));
-
-  const residualsAsArray = residuals.getColumn(0);
-
-  const errorVariance =
-    arraySum(elementwiseProduct(weights, squareArray(residualsAsArray))) /
-    (y.rows - x.columns);
-
-  const covarianceMatrix = Matrix.mul(inverseWeightedXXT, errorVariance);
-
-  const errorCoefficients = sqrtArray(covarianceMatrix.diag());
-
-  const newXDesign = newX.clone().addColumn(0, new Array(newX.rows).fill(1));
-
-  const newY = newXDesign.mmul(beta);
-
-  const newYVariance = newXDesign
-    .mmul(covarianceMatrix)
-    .mmul(newXDesign.transpose());
-
-  const newYStandardError = sqrtArray(newYVariance.getColumn(0));
-
-  return {
-    yHat: newY,
-    yHatStandardError: newYStandardError,
-    betas: beta,
-    betaStandardErrors: errorCoefficients,
-    x: newX,
-  };
+export function unweightedLinearRegression(x: Matrix, y: Matrix, newX: Matrix) {
+  const weights = new Array(x.rows).fill(1);
+  return linearRegression(x, y, weights, newX, "WEIGHTED");
 }
 
 export const scaleRows = (theMatrix: Matrix, scaleBy: number[]) => {

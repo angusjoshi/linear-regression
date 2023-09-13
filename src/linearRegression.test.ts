@@ -2,8 +2,10 @@ import Matrix from "ml-matrix";
 import {
   LinearModel,
   scaleRows,
+  sigmaLinearRegression,
   sqrtArray,
   sqrtEntries,
+  unweightedLinearRegression,
   weightedLinearRegression,
 } from "./linearRegression";
 
@@ -38,12 +40,12 @@ describe("scaleRows", () => {
   });
 });
 
-describe("sqrtRows", () => {
+describe("sqrtEntries", () => {
   it("sqrts a column vector correctly", () => {
-    const columnVector = new Matrix([[1], [4], [9]]);
+    const columnVector = Matrix.columnVector([1, 4, 9]);
 
     const result = sqrtEntries(columnVector);
-    const expectedResult = new Matrix([[1], [2], [3]]);
+    const expectedResult = Matrix.columnVector([1, 2, 3]);
 
     expect(result).toEqual(expectedResult);
   });
@@ -59,7 +61,7 @@ describe("sqrtArray", () => {
 });
 
 describe("weightedLinearRegression", () => {
-  it("computes the correct result", () => {
+  it("computes the correct result for n=5", () => {
     const x = Matrix.columnVector([0, 1, 2, 3, 4]);
     x.addColumn(0, [1, 1, 1, 1, 1]);
 
@@ -75,6 +77,52 @@ describe("weightedLinearRegression", () => {
       yHatStandardError: [0.9723889462909812],
       betas: Matrix.columnVector([0.588144, 0.956186]),
       betaStandardErrors: [0.41868459525895235, 0.24172766377830565],
+      x: Matrix.columnVector([5]),
+    };
+
+    expectResultToBeCloseTo(result, expectedResult);
+  });
+});
+
+describe("sigmaLinearRegression", () => {
+  it("computes the correct result for n=5", () => {
+    const x = Matrix.columnVector([0, 1, 2, 3, 4]);
+    x.addColumn(0, [1, 1, 1, 1, 1]);
+
+    const y = Matrix.columnVector([0.1, 2.2, 2.7, 3, 4]);
+    const sigmas = [1, 1, 2, 2, 2];
+    const newX = Matrix.columnVector([5]);
+
+    const result = sigmaLinearRegression(x, y, newX, sigmas);
+
+    const expectedResult = {
+      yHat: Matrix.columnVector([5.369072]),
+      yHatStandardError: [1.9157513],
+      betas: Matrix.columnVector([0.588144, 0.956186]),
+      betaStandardErrors: [0.8248711, 0.4762396],
+      x: Matrix.columnVector([5]),
+    };
+
+    expectResultToBeCloseTo(result, expectedResult);
+  });
+});
+
+describe("unweightedLinearRegression", () => {
+  it("computes the correct result for n=5", () => {
+    const x = Matrix.columnVector([0, 1, 2, 3, 4]);
+    x.addColumn(0, [1, 1, 1, 1, 1]);
+
+    const y = Matrix.columnVector([0.1, 2.2, 2.7, 3, 4]);
+    const sigmas = [1, 1, 2, 2, 2];
+    const newX = Matrix.columnVector([5]);
+
+    const result = unweightedLinearRegression(x, y, newX);
+
+    const expectedResult = {
+      yHat: Matrix.columnVector([4.98]),
+      yHatStandardError: [0.5883309726109389],
+      betas: Matrix.columnVector([0.68, 0.86]),
+      betaStandardErrors: [0.43451121964800865, 0.1773884626086676],
       x: Matrix.columnVector([5]),
     };
 
