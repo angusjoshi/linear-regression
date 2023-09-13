@@ -8,11 +8,6 @@ export type LinearModel = {
   x: Matrix;
 };
 
-type LinearRegression = {
-  betas: Matrix;
-  residuals: number[];
-  covarianceMatrix: Matrix;
-};
 type RegressionType = "SIGMA" | "WEIGHTED";
 
 function linearRegression(
